@@ -70,12 +70,12 @@ export default function ListItem(props: { task: Task }) {
   return (
     <li
       key={task.id}
-      className={clsx(editing && "editing", task.completed && "completed")}
+      className="list-row items-center bg-accent"
       ref={wrapperRef}
     >
-      <div className="view">
-        <input
-          className="toggle"
+      <div>
+                    <input
+          className="checkbox"
           type="checkbox"
           checked={task.completed}
           onChange={(e) => {
@@ -87,7 +87,11 @@ export default function ListItem(props: { task: Task }) {
           }}
           autoFocus={editing}
         />
+        </div>
+        <div className="list-col-grow">
+        <div>      
         <label
+          className={clsx("label", { hidden: editing })}
           onDoubleClick={(e) => {
             setEditing(true);
             e.currentTarget.focus();
@@ -95,15 +99,10 @@ export default function ListItem(props: { task: Task }) {
         >
           {text}
         </label>
-        <button
-          className="destroy"
-          onClick={() => {
-            deleteTask.mutate(task.id);
-          }}
-        />
       </div>
-      <input
-        className="edit"
+      <div>
+          <input
+        className={clsx("input", { hidden: !editing })}
         value={text}
         ref={inputRef}
         onChange={(e) => {
@@ -119,7 +118,13 @@ export default function ListItem(props: { task: Task }) {
             setEditing(false);
           }
         }}
-      />
+      /> 
+    </div>
+  </div>
+  <input className="btn btn-square" type="reset" value="×" onClick={() => {
+            deleteTask.mutate(task.id);
+          }} 
+  />
     </li>
   );
 }

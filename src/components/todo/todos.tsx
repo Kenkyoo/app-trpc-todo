@@ -78,12 +78,16 @@ export default function Todos(props: PageProps) {
 
   return (
     <>
-      <section className="todoapp">
-        <header className="header">
-          <h1>todos</h1>
-
+      <div className="flex flex-col justify-center items-center">
+        <header>
+<h1 className="mb-5 text-5xl font-bold">Grocery App</h1> 
+</header>
+<div data-theme="cupcake" className="card bg-base-100 w-96 shadow-sm">
+  <div className="card-body gap-10">
+  <h2 className="card-title mx-auto text-primary">My grocery list</h2>
+  <div >
           <input
-            className="new-todo"
+            className="input"
             placeholder="What needs to be done"
             autoFocus
             onKeyDown={(e) => {
@@ -94,20 +98,23 @@ export default function Todos(props: PageProps) {
               }
             }}
           />
-        </header>
+  </div>
 
-        <section className="main">
-          <input
+          <ul className="list bg-base-100 rounded-box shadow-md pb-20">
+  <li className="p-4 pb-2 text-xs opacity-60 tracking-wide">
+      <label htmlFor="toggle-all" className="label">
+                 <input
             id="toggle-all"
-            className="toggle-all"
+            className="checkbox"
             type="checkbox"
             checked={tasksCompleted === allTasks.data?.length}
             onChange={(e) => {
               toggleAll.mutate({ completed: e.currentTarget.checked });
             }}
-          />
-          <label htmlFor="toggle-all">Mark all as complete</label>
-          <ul className="todo-list">
+          /> 
+    Mark all as complete
+  </label>
+</li>            
             {allTasks.data
               ?.filter(({ completed }) =>
                 props.filter === "completed"
@@ -120,39 +127,36 @@ export default function Todos(props: PageProps) {
                 <ListItem key={task.id} task={task} />
               ))}
           </ul>
-        </section>
-
-        <footer className="footer">
-          <span className="todo-count">
-            <strong>{tasksLeft} </strong>
-            {tasksLeft == 1 ? "task left" : "tasks left"}
-          </span>
-
-          <ul className="filters">
-            {filters.map((filter) => (
-              <li key={"filter-" + filter}>
-                <Link
+    <div className="card-actions flex justify-center gap-2 mt-5">
+      <div className="stats shadow">
+  <div className="stat">
+    <div className="stat-title">{tasksLeft == 1 ? "task left" : "tasks left"}</div>
+    <div className="stat-value text-primary">{tasksLeft} </div>
+  </div>
+</div>
+          <div className="filter">
+            {filters.map((filter) => (               
+             <Link
                   href={"/" + filter}
                   className={filter == props.filter ? "selected" : ""}
                 >
-                  {filter[0].toUpperCase() + filter.slice(1)}
-                </Link>
-              </li>
+              <input key={"filter-" + filter} className="btn bg-accent" type="radio" name="filters" aria-label={filter[0].toUpperCase() + filter.slice(1)}
+                
+              />
+            </Link>
             ))}
-          </ul>
-
           {tasksCompleted > 0 && (
-            <button
-              className="clear-completed"
+            <input className="btn btn-square" type="reset" value="×"
               onClick={() => {
                 clearCompleted.mutate();
               }}
-            >
-              Clear completed
-            </button>
+            />
           )}
-        </footer>
-      </section>
-    </>
+        </div>
+          </div>
+        </div>
+      </div>
+      </div>
+  </>
   );
 }
