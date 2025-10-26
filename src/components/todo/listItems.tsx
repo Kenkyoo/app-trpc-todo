@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useClickOutside } from "~/utils/use-click-outside";
 import type { AppRouter } from "~/server/routers/_app";
 import type { inferProcedureOutput } from "@trpc/server";
@@ -41,6 +41,7 @@ export default function ListItem(props: { task: Task }) {
       );
     },
   });
+
   const deleteTask = trpc.todo.delete.useMutation({
     async onMutate() {
       await utils.todo.all.cancel();
@@ -55,16 +56,18 @@ export default function ListItem(props: { task: Task }) {
     },
   });
 
+  const handleOutsideClick = useCallback(() => {
+    editTask.mutate({
+      id: task.id,
+      data: { text },
+    });
+    setEditing(false);
+  }, [editTask, task.id, text]);
+
   useClickOutside({
     ref: wrapperRef,
     enabled: editing,
-    callback() {
-      editTask.mutate({
-        id: task.id,
-        data: { text },
-      });
-      setEditing(false);
-    },
+    callback: handleOutsideClick,
   });
 
   return (
@@ -74,7 +77,7 @@ export default function ListItem(props: { task: Task }) {
       ref={wrapperRef}
     >
       <div>
-                    <input
+        <input
           className="checkbox"
           type="checkbox"
           checked={task.completed}
@@ -87,44 +90,48 @@ export default function ListItem(props: { task: Task }) {
           }}
           autoFocus={editing}
         />
-        </div>
-        <div className="list-col-grow">
-        <div>      
-        <label
-          className={clsx("label", { hidden: editing })}
-          onDoubleClick={(e) => {
-            setEditing(true);
-            e.currentTarget.focus();
-          }}
-        >
-          {text}
-        </label>
       </div>
-      <div>
+      <div className="list-col-grow">
+        <div>
+          <label
+            className={clsx("label", { hidden: editing })}
+            onDoubleClick={(e) => {
+              setEditing(true);
+              e.currentTarget.focus();
+            }}
+          >
+            {text}
+          </label>
+        </div>
+        <div>
           <input
-        className={clsx("input", { hidden: !editing })}
-        value={text}
-        ref={inputRef}
-        onChange={(e) => {
-          const newText = e.currentTarget.value;
-          setText(newText);
+            className={clsx("input", { hidden: !editing })}
+            value={text}
+            ref={inputRef}
+            onChange={(e) => {
+              const newText = e.currentTarget.value;
+              setText(newText);
+            }}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                editTask.mutate({
+                  id: task.id,
+                  data: { text },
+                });
+                setEditing(false);
+              }
+            }}
+          />
+        </div>
+      </div>
+      <input
+        className="btn btn-square"
+        type="reset"
+        value="×"
+        onClick={() => {
+          deleteTask.mutate(task.id);
         }}
-        onKeyPress={(e) => {
-          if (e.key === "Enter") {
-            editTask.mutate({
-              id: task.id,
-              data: { text },
-            });
-            setEditing(false);
-          }
-        }}
-      /> 
-    </div>
-  </div>
-  <input className="btn btn-square" type="reset" value="×" onClick={() => {
-            deleteTask.mutate(task.id);
-          }} 
-  />
+      />
     </li>
   );
 }
