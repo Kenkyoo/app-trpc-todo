@@ -1,32 +1,24 @@
-import type { CreateNextContextOptions } from '@trpc/server/adapters/next';
-import { prisma } from './prisma';
+import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import { getAuth } from "@clerk/nextjs/server";
+import { prisma } from "./prisma";
 
-/**
- * Defines your inner context shape.
- * Add fields here that the inner context brings.
- */
 export interface CreateInnerContextOptions
   extends Partial<CreateNextContextOptions> {}
 
 /**
- * Inner context. Will always be available in your procedures, in contrast to the outer context.
- *
- * Also useful for:
- * - testing, so you don't have to mock Next.js' `req`/`res`
- * - tRPC's `createSSGHelpers` where we don't have `req`/`res`
- *
- * @see https://trpc.io/docs/v11/context#inner-and-outer-context
+ * Contexto interno, reutilizable (por ejemplo para pruebas o SSG)
  */
 export async function createInnerTRPCContext(opts?: CreateInnerContextOptions) {
+  const auth = opts?.req ? getAuth(opts.req) : null;
+
   return {
-    ...opts,
+    prisma,
+    auth, // 👈 ahora tu ctx tiene el objeto auth de Clerk
   };
 }
 
 /**
- * Outer context. Used in the routers and will e.g. bring `req` & `res` to the context as "not `undefined`".
- *
- * @see https://trpc.io/docs/v11/context#inner-and-outer-context
+ * Contexto externo (usa el interno pero con req/res)
  */
 export const createTRPCContext = async (opts?: CreateNextContextOptions) => {
   const innerContext = await createInnerTRPCContext({

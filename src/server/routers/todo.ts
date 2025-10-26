@@ -1,29 +1,35 @@
 import { z } from 'zod';
 import { prisma } from '../prisma';
-import { baseProcedure, router } from '../trpc';
+import { router, protectedProcedure } from '../trpc';
 
 export const todoRouter = router({
-  all: baseProcedure.query(() => {
+  all: protectedProcedure.query(async ({ ctx }) => {
+    const user = await prisma.user.findUnique({
+      where: { clerkUserId: ctx.userId },
+    });
+
     return prisma.task.findMany({
-      orderBy: {
-        createdAt: 'asc',
-      },
+      where: { userId: user?.id },
+      orderBy: { createdAt: 'asc' },
     });
   }),
-  add: baseProcedure
-    .input(
-      z.object({
-        id: z.string().optional(),
-        text: z.string().min(1),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const todo = await prisma.task.create({
-        data: input,
+
+  add: protectedProcedure
+    .input(z.object({ text: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const user = await prisma.user.findUnique({
+        where: { clerkUserId: ctx.userId },
       });
-      return todo;
+
+      return prisma.task.create({
+        data: {
+          text: input.text,
+          userId: user!.id,
+        },
+      });
     }),
-  edit: baseProcedure
+
+  edit: protectedProcedure
     .input(
       z.object({
         id: z.string().uuid(),
@@ -33,30 +39,40 @@ export const todoRouter = router({
         }),
       }),
     )
-    .mutation(async ({ input }) => {
-      const { id, data } = input;
-      const todo = await prisma.task.update({
-        where: { id },
-        data,
+    .mutation(async ({ input, ctx }) => {
+      const user = await prisma.user.findUnique({
+        where: { clerkUserId: ctx.userId },
       });
-      return todo;
-    }),
-  toggleAll: baseProcedure
-    .input(z.object({ completed: z.boolean() }))
-    .mutation(async ({ input }) => {
-      await prisma.task.updateMany({
-        data: { completed: input.completed },
+
+      return prisma.task.update({
+        where: { id: input.id, userId: user!.id },
+        data: input.data,
       });
     }),
-  delete: baseProcedure
+
+  delete: protectedProcedure
     .input(z.string().uuid())
-    .mutation(async ({ input: id }) => {
-      await prisma.task.delete({ where: { id } });
+    .mutation(async ({ input: id, ctx }) => {
+      const user = await prisma.user.findUnique({
+        where: { clerkUserId: ctx.userId },
+      });
+
+      await prisma.task.delete({
+        where: { id, userId: user!.id },
+      });
+
       return id;
     }),
-  clearCompleted: baseProcedure.mutation(async () => {
-    await prisma.task.deleteMany({ where: { completed: true } });
 
-    return prisma.task.findMany();
+  clearCompleted: protectedProcedure.mutation(async ({ ctx }) => {
+    const user = await prisma.user.findUnique({
+      where: { clerkUserId: ctx.userId },
+    });
+
+    await prisma.task.deleteMany({
+      where: { completed: true, userId: user!.id },
+    });
+
+    return prisma.task.findMany({ where: { userId: user!.id } });
   }),
 });

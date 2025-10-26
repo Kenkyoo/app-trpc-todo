@@ -1,30 +1,28 @@
-import Link from 'next/link';
-
 export function InfoFooter(props: { filter: string }) {
   return (
     <footer className="info">
       <p>Double click to edit a todo</p>
       {/* Change this out with your name and url ↓ */}
       <p>
-        Created with <a href="http://trpc.io">tRPC</a> by{' '}
+        Created with <a href="http://trpc.io">tRPC</a> by{" "}
         <a href="https://twitter.com/alexdotjs">alexdotjs / KATT</a>.
       </p>
       <p>
         <a href="https://github.com/trpc/examples-next-prisma-todomvc">
           Source code
-        </a>{' '}
+        </a>{" "}
       </p>
       <p>
-        Based on <a href="http://todomvc.com">TodoMVC</a>, template made by{' '}
+        Based on <a href="http://todomvc.com">TodoMVC</a>, template made by{" "}
         <a href="http://sindresorhus.com">Sindre Sorhus</a>.
       </p>
 
       <div
         style={{
-          marginTop: '100px',
-          display: 'flex',
+          marginTop: "100px",
+          display: "flex",
           gap: 8,
-          justifyContent: 'center',
+          justifyContent: "center",
         }}
       >
         <a
