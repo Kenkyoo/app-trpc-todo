@@ -44,7 +44,7 @@ export const todoRouter = router({
         where: { clerkUserId: ctx.userId },
       });
 
-      return prisma.task.update({
+      return prisma.task.updateMany({
         where: { id: input.id, userId: user!.id },
         data: input.data,
       });
@@ -57,7 +57,7 @@ export const todoRouter = router({
         where: { clerkUserId: ctx.userId },
       });
 
-      await prisma.task.delete({
+      await prisma.task.deleteMany({
         where: { id, userId: user!.id },
       });
 
