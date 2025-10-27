@@ -34,54 +34,38 @@ function Header() {
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
             <li>
-              <a>Item 1</a>
+              <a href="https://github.com/Kenkyoo">My Github</a>
             </li>
             <li>
-              <a>Parent</a>
-              <ul className="p-2">
-                <li>
-                  <a>Submenu 1</a>
-                </li>
-                <li>
-                  <a>Submenu 2</a>
-                </li>
-              </ul>
+              <a href="https://github.com/Kenkyoo/app-trpc-todo">Repo</a>
             </li>
             <li>
-              <a>Item 3</a>
+              <a href="https://app.netlify.com">Deploy</a>
             </li>
           </ul>
         </div>
-        <a className="btn btn-ghost text-xl text-primary">daisyUI</a>
+        <a className="btn btn-ghost text-xl text-accent font-fantasy font-bold italic">GroceryApp</a>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
           <li>
-            <a>Item 1</a>
+            <a href="https://github.com/Kenkyoo">My Github</a>
           </li>
           <li>
-            <details>
-              <summary>Parent</summary>
-              <ul className="p-2">
-                <li>
-                  <a>Submenu 1</a>
-                </li>
-                <li>
-                  <a>Submenu 2</a>
-                </li>
-              </ul>
-            </details>
+            <a href="https://github.com/Kenkyoo/app-trpc-todo">Repo</a>
           </li>
           <li>
-            <a>Item 3</a>
+            <a href="https://app.netlify.com">Deploy</a>
           </li>
         </ul>
       </div>
       <div className="navbar-end me-4">
         <SignedOut>
-          <SignInButton />
+          <SignInButton>
+          <button className="btn btn-primary text-white mx-2">Login</button>
+        </SignInButton>
           <SignUpButton>
-            <a className="btn">Sign Up</a>
+            <button className="btn btn-secondary text-white mx-2">Sign Up</button>
           </SignUpButton>
         </SignedOut>
         <SignedIn>

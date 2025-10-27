@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@theme {  --font-display: "Oswald", sans-serif; }
 @plugin "daisyui" {
   themes: lemonade, cupcake;
 }
+@font-face {  font-family: Oswald;  font-style: normal;  font-weight: 200 700;  font-display: swap;  src: url("/fonts/Oswald.woff2") format("woff2");}

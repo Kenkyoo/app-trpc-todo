@@ -5,16 +5,20 @@ import Header from "~/components/navbar";
 import { useIsMutating } from "@tanstack/react-query";
 import type { inferProcedureOutput } from "@trpc/server";
 import clsx from "clsx";
-import type {
-  GetStaticPaths,
-  GetStaticPropsContext,
-  InferGetStaticPropsType,
-} from "next";
+import type { InferGetStaticPropsType } from "next";
 import { useEffect, useRef, useState } from "react";
 import type { AppRouter } from "../server/routers/_app";
-import { ssgInit } from "../server/ssg-init";
 import { trpc } from "../utils/trpc";
 import { useClickOutside } from "../utils/use-click-outside";
+import getStaticProps from "~/lib/getStaticProps";
+import groceries from "~/lib/groceries";
+import filters from "~/lib/filters";
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
+} from "@headlessui/react";
 
 type Task = inferProcedureOutput<AppRouter["todo"]["all"]>[number];
 
@@ -81,7 +85,7 @@ function ListItem(props: { task: Task }) {
   return (
     <li
       key={task.id}
-      className="list-row items-center bg-accent p-1 my-2"
+      className="list-row items-center bg-secondary py-1 px-2 my-2"
       ref={wrapperRef}
     >
       <div>
@@ -102,7 +106,9 @@ function ListItem(props: { task: Task }) {
       <div className="list-col-grow">
         <div>
           <label
-            className={clsx("label", { hidden: editing })}
+            className={clsx("label text-white text-xs font-bold", {
+              hidden: editing,
+            })}
             onDoubleClick={(e) => {
               setEditing(true);
               e.currentTarget.focus();
@@ -145,11 +151,15 @@ function ListItem(props: { task: Task }) {
 }
 
 type PageProps = InferGetStaticPropsType<typeof getStaticProps>;
+
 export default function TodosPage(props: PageProps) {
-  /*
-   * This data will be hydrated from the `prefetch` in `getStaticProps`. This means that the page
-   * will be rendered with the data from the server and there'll be no client loading state 👍
-   */
+  const [query, setQuery] = useState("");
+
+  const filtered =
+    query === ""
+      ? groceries
+      : groceries.filter((g) => g.toLowerCase().includes(query.toLowerCase()));
+
   const allTasks = trpc.todo.all.useQuery(undefined, {
     staleTime: 3000,
   });
@@ -220,7 +230,7 @@ export default function TodosPage(props: PageProps) {
   const tasksCompleted = allTasks.data?.filter((t) => t.completed).length ?? 0;
 
   return (
-    <div data-theme="cupcake">
+    <div data-theme="cupcake" className="font-display">
       <Head>
         <title>Todos</title>
         <link rel="icon" href="/favicon.ico" />
@@ -246,30 +256,57 @@ export default function TodosPage(props: PageProps) {
               </header>
               <div
                 data-theme="cupcake"
-                className="card bg-base-100 w-96 shadow-sm"
+                className="card bg-base-300 w-96 shadow-lg"
               >
                 <div className="card-body gap-10">
-                  <h2 className="card-title mx-auto text-primary">
+                  <h2 className="card-title mx-auto text-primary text-2xl font-bold">
                     My grocery list
                   </h2>
                   <div>
-                    <input
-                      className="input"
-                      placeholder="What needs to be done"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        const text = e.currentTarget.value.trim();
-                        if (e.key === "Enter" && text) {
-                          addTask.mutate({ text });
-                          e.currentTarget.value = "";
+                    <Combobox
+                      value={query}
+                      onChange={(val) => {
+                        if (val && val.trim() !== "") {
+                          addTask.mutate({ text: val });
                         }
+                        setQuery("");
                       }}
-                    />
+                    >
+                      <ComboboxInput
+                        placeholder="What needs to be done"
+                        className="input"
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          const text = e.currentTarget.value.trim();
+                          if (e.key === "Enter" && text) {
+                            addTask.mutate({ text });
+                            setQuery("");
+                          }
+                        }}
+                      />
+                      <ComboboxOptions
+                        anchor="bottom"
+                        className="border mt-1 rounded bg-white"
+                      >
+                        {filtered.map((item) => (
+                          <ComboboxOption
+                            key={item}
+                            value={item}
+                            className="p-2 hover:bg-gray-100 cursor-pointer"
+                          >
+                            {item}
+                          </ComboboxOption>
+                        ))}
+                      </ComboboxOptions>
+                    </Combobox>
                   </div>
 
-                  <ul className="list bg-base-100 rounded-box shadow-md pb-20">
+                  <ul className="list bg-base-300 rounded-box shadow-md pb-20 px-4">
                     <li className="p-4 pb-2 text-xs opacity-60 tracking-wide">
-                      <label htmlFor="toggle-all" className="label">
+                      <label
+                        htmlFor="toggle-all"
+                        className="label font-semibold"
+                      >
                         <input
                           id="toggle-all"
                           className="checkbox"
@@ -296,7 +333,7 @@ export default function TodosPage(props: PageProps) {
                         <ListItem key={task.id} task={task} />
                       ))}
                   </ul>
-                  <div className="card-actions flex justify-center gap-2 mt-5">
+                  <div className="card-actions flex justify-center gap-4 mt-5">
                     <div className="stats shadow">
                       <div className="stat">
                         <div className="stat-title">
@@ -346,29 +383,3 @@ export default function TodosPage(props: PageProps) {
     </div>
   );
 }
-
-const filters = ["all", "active", "completed"] as const;
-export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = filters.map((filter) => ({
-    params: { filter },
-  }));
-
-  return {
-    paths,
-    fallback: false,
-  };
-};
-
-export const getStaticProps = async (context: GetStaticPropsContext) => {
-  const ssg = await ssgInit(context);
-
-  await ssg.todo.all.prefetch();
-
-  return {
-    props: {
-      trpcState: ssg.dehydrate(),
-      filter: (context.params?.filter as string) ?? "all",
-    },
-    revalidate: 1,
-  };
-};
