@@ -1,5 +1,5 @@
 {
-  "name": "examples-trpc-next-prisma-todomvc",
+  "name": "app-trpc-grocery-list",
   "private": true,
   "scripts": {
     "generate": "prisma generate",
