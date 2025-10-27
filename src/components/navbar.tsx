@@ -44,7 +44,9 @@ function Header() {
             </li>
           </ul>
         </div>
-        <a className="btn btn-ghost text-xl text-accent font-fantasy font-bold italic">GroceryApp</a>
+        <a className="btn btn-ghost text-xl text-accent font-serif font-bold italic">
+          GroceryApp
+        </a>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
@@ -62,10 +64,12 @@ function Header() {
       <div className="navbar-end me-4">
         <SignedOut>
           <SignInButton>
-          <button className="btn btn-primary text-white mx-2">Login</button>
-        </SignInButton>
+            <button className="btn btn-primary text-white mx-2">Login</button>
+          </SignInButton>
           <SignUpButton>
-            <button className="btn btn-secondary text-white mx-2">Sign Up</button>
+            <button className="btn btn-secondary text-white mx-2">
+              Sign Up
+            </button>
           </SignUpButton>
         </SignedOut>
         <SignedIn>

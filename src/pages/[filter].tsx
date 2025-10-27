@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import type { AppRouter } from "../server/routers/_app";
 import { trpc } from "../utils/trpc";
 import { useClickOutside } from "../utils/use-click-outside";
-import getStaticProps from "~/lib/getStaticProps";
+import { getStaticProps } from "~/lib/getStaticProps";
 import groceries from "~/lib/groceries";
 import filters from "~/lib/filters";
 import {
